@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { signToken, setAuthCookie } from "@/lib/auth";
 
+export const runtime = "nodejs";
+
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();

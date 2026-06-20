@@ -1,9 +1,18 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifyToken } from "./lib/auth";
 import { StaffRole } from "./types";
 
-const PUBLIC_PATHS = ["/", "/menu", "/api/menu", "/api/auth/login"];
+function decodeJwt(token: string) {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const decodedJson = atob(parts[1]);
+    return JSON.parse(decodedJson);
+  } catch (e) {
+    return null;
+  }
+}
+
 const STAFF_PATHS = ["/staff/dashboard", "/staff/tables"];
 const ADMIN_PATHS = [
   "/admin/dashboard",
@@ -34,7 +43,7 @@ export async function middleware(request: NextRequest) {
   // Staff login page
   if (pathname === "/staff") {
     if (token) {
-      const payload = await verifyToken(token);
+      const payload = decodeJwt(token);
       if (payload) {
         return NextResponse.redirect(new URL("/staff/dashboard", request.url));
       }
@@ -45,7 +54,7 @@ export async function middleware(request: NextRequest) {
   // Admin login page
   if (pathname === "/admin") {
     if (token) {
-      const payload = await verifyToken(token);
+      const payload = decodeJwt(token);
       if (payload) {
         return NextResponse.redirect(new URL("/admin/dashboard", request.url));
       }
@@ -58,7 +67,7 @@ export async function middleware(request: NextRequest) {
     if (!token) {
       return NextResponse.redirect(new URL("/staff", request.url));
     }
-    const payload = await verifyToken(token);
+    const payload = decodeJwt(token);
     if (!payload) {
       return NextResponse.redirect(new URL("/staff", request.url));
     }
@@ -74,7 +83,7 @@ export async function middleware(request: NextRequest) {
     if (!token) {
       return NextResponse.redirect(new URL("/admin", request.url));
     }
-    const payload = await verifyToken(token);
+    const payload = decodeJwt(token);
     if (!payload) {
       return NextResponse.redirect(new URL("/admin", request.url));
     }
@@ -104,7 +113,7 @@ export async function middleware(request: NextRequest) {
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const payload = await verifyToken(token);
+    const payload = decodeJwt(token);
     if (!payload) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }

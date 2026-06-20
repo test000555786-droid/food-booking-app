@@ -17,7 +17,7 @@ export default function AdminMenuPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/session")

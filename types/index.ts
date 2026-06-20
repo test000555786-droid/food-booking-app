@@ -1,7 +1,22 @@
-import { OrderStatus, CallType, StaffRole } from "@prisma/client";
+export enum OrderStatus {
+  PENDING = "PENDING",
+  CONFIRMED = "CONFIRMED",
+  PREPARING = "PREPARING",
+  READY = "READY",
+  SERVED = "SERVED",
+  CANCELLED = "CANCELLED"
+}
 
-// Re-export enums
-export { OrderStatus, CallType, StaffRole };
+export enum CallType {
+  WAITER = "WAITER",
+  BILL = "BILL"
+}
+
+export enum StaffRole {
+  ADMIN = "ADMIN",
+  MANAGER = "MANAGER",
+  STAFF = "STAFF"
+}
 
 // ===== Core Data Models =====
 

@@ -53,7 +53,7 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [, setIsSidebarOpen] = useState(false);
 
   if (isLoading) {
     return (
