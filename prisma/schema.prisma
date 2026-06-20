@@ -1,0 +1,159 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Restaurant {
+  id          String   @id @default(cuid())
+  name        String
+  tagline     String?
+  logoUrl     String?
+  address     String?
+  phone       String?
+  createdAt   DateTime @default(now())
+  tables      Table[]
+  categories  Category[]
+  menuItems   MenuItem[]
+  orders      Order[]
+  reviews     Review[]
+  staffUsers  StaffUser[]
+}
+
+model Table {
+  id           String   @id @default(cuid())
+  restaurantId String
+  tableNumber  Int
+  label        String?
+  qrCodeUrl    String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  orders       Order[]
+  sessions     TableSession[]
+  waiterCalls  WaiterCall[]
+}
+
+model TableSession {
+  id         String   @id @default(cuid())
+  tableId    String
+  startedAt  DateTime @default(now())
+  endedAt    DateTime?
+  table      Table    @relation(fields: [tableId], references: [id])
+  orders     Order[]
+}
+
+model Category {
+  id           String     @id @default(cuid())
+  restaurantId String
+  name         String
+  emoji        String?
+  sortOrder    Int        @default(0)
+  isVisible    Boolean    @default(true)
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  menuItems    MenuItem[]
+}
+
+model MenuItem {
+  id           String      @id @default(cuid())
+  restaurantId String
+  categoryId   String
+  name         String
+  description  String?
+  price        Decimal     @db.Decimal(10, 2)
+  imageUrl     String?
+  isVeg        Boolean     @default(true)
+  isAvailable  Boolean     @default(true)
+  isBestseller Boolean     @default(false)
+  isSpicy      Boolean     @default(false)
+  sortOrder    Int         @default(0)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
+  category     Category    @relation(fields: [categoryId], references: [id])
+  orderItems   OrderItem[]
+}
+
+model Order {
+  id             String      @id @default(cuid())
+  restaurantId   String
+  tableId        String
+  sessionId      String
+  orderNumber    Int
+  status         OrderStatus @default(PENDING)
+  specialRequest String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  restaurant     Restaurant  @relation(fields: [restaurantId], references: [id])
+  table          Table       @relation(fields: [tableId], references: [id])
+  session        TableSession @relation(fields: [sessionId], references: [id])
+  items          OrderItem[]
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  SERVED
+  CANCELLED
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  orderId    String
+  menuItemId String
+  quantity   Int
+  unitPrice  Decimal  @db.Decimal(10, 2)
+  note       String?
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+}
+
+model WaiterCall {
+  id           String   @id @default(cuid())
+  tableId      String
+  type         CallType @default(WAITER)
+  isResolved   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  resolvedAt   DateTime?
+  table        Table    @relation(fields: [tableId], references: [id])
+}
+
+enum CallType {
+  WAITER
+  BILL
+}
+
+model Review {
+  id           String   @id @default(cuid())
+  restaurantId String
+  tableId      String
+  sessionId    String
+  rating       Int
+  comment      String?
+  isVisible    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+}
+
+model StaffUser {
+  id           String    @id @default(cuid())
+  restaurantId String
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         StaffRole @default(STAFF)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+}
+
+enum StaffRole {
+  ADMIN
+  MANAGER
+  STAFF
+}
