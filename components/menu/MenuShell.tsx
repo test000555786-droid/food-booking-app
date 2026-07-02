@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { MenuItem } from "@/types";
 import { useCart } from "@/hooks/useCart";
 import { formatTableName } from "@/lib/formatters";
@@ -34,12 +34,13 @@ interface MenuShellProps {
 
 export function MenuShell({ tableId, restaurant, table }: MenuShellProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: menuData, isLoading } = useMenu(restaurant.id);
   const { items, totalItems, totalPrice, addToCart } = useCart();
   const { session, isLoading: isSessionLoading, startSession } = useTableSession(tableId);
   
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(searchParams.get("category"));
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
@@ -160,7 +161,7 @@ export function MenuShell({ tableId, restaurant, table }: MenuShellProps) {
             <CategoryTabs
               categories={categories}
               activeCategory={selectedCategory}
-              onCategoryChange={setSelectedCategory}
+              onCategoryChange={(id) => setSelectedCategory(prev => prev === id ? null : id)}
             />
           </div>
         )}

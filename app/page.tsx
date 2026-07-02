@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/shared/Logo";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/formatters";
+import { HomeMenuPreview } from "@/components/home/HomeMenuPreview";
 
 export const dynamic = "force-dynamic";
 
@@ -91,73 +92,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Categories */}
-      {restaurant?.categories && restaurant.categories.length > 0 && (
-        <section className="bg-surface py-8 border-y border-border overflow-hidden">
-          <div className="max-w-5xl mx-auto px-4">
-            <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x justify-start md:justify-center">
-              {restaurant.categories.map((category) => (
-                <div 
-                  key={category.id} 
-                  className="snap-center flex-shrink-0 flex items-center gap-2 px-5 py-3 bg-bg rounded-2xl border border-border hover:border-primary/30 transition-colors shadow-sm"
-                >
-                  <span className="text-xl leading-none">{category.emoji}</span>
-                  <span className="font-semibold text-text text-sm">{category.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Menu Preview */}
-      {restaurant?.menuItems && restaurant.menuItems.length > 0 && (
-        <section className="bg-surface border-y border-border py-16">
-          <div className="max-w-5xl mx-auto px-4">
-            <h2 className="font-display text-2xl font-bold text-text text-center mb-10">Popular Dishes</h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {restaurant.menuItems.map((item) => (
-                <div key={item.id} className="bg-bg rounded-2xl border border-border p-4 flex gap-3">
-                  <div className="w-20 h-20 rounded-xl bg-white flex-shrink-0 overflow-hidden">
-                    {item.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-text-muted">
-                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0 flex flex-col justify-between">
-                    <div>
-                      <h3 className="font-display font-semibold text-text text-sm truncate">{item.name}</h3>
-                      {item.description && (
-                        <p className="text-xs text-text-muted line-clamp-2 mt-0.5">{item.description}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <p className="text-sm font-semibold text-primary">{formatPrice(Number(item.price))}</p>
-                      {demoTableId && (
-                        <Link 
-                          href={`/menu/${demoTableId}`}
-                          className="px-3 py-1 bg-primary text-white text-xs font-bold rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-1 shadow-sm"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                          </svg>
-                          Order
-                        </Link>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      {/* Categories & Menu Preview */}
+      <HomeMenuPreview 
+        categories={restaurant?.categories || []} 
+        popularItems={restaurant?.menuItems || []} 
+        restaurantId={restaurant?.id || ""} 
+        tableId={demoTableId || ""} 
+      />
 
       {/* Reviews */}
       {restaurant?.reviews && restaurant.reviews.length > 0 && (
