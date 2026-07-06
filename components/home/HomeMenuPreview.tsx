@@ -9,7 +9,10 @@ import { MenuItemCard } from "@/components/menu/MenuItemCard";
 import { ItemDetailModal } from "@/components/menu/ItemDetailModal";
 import { CartFab } from "@/components/menu/CartFab";
 import { CartDrawer } from "@/components/menu/CartDrawer";
+import { OrdersFab } from "@/components/menu/OrdersFab";
+import { OrdersDrawer } from "@/components/menu/OrdersDrawer";
 import { useTableSession } from "@/hooks/useTableSession";
+import { useRouter } from "next/navigation";
 
 interface HomeMenuPreviewProps {
   categories: Category[];
@@ -24,6 +27,8 @@ export function HomeMenuPreview({ categories, popularItems, restaurantId, tableI
   
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isOrdersOpen, setIsOrdersOpen] = useState(false);
+  const router = useRouter();
 
   // Hydrate cart on mount
   useEffect(() => {
@@ -51,6 +56,12 @@ export function HomeMenuPreview({ categories, popularItems, restaurantId, tableI
       quantity,
       note,
     });
+  };
+
+  const handleOrderPlaced = () => {
+    setIsCartOpen(false);
+    setIsOrdersOpen(true);
+    router.refresh();
   };
 
   return (
@@ -108,7 +119,7 @@ export function HomeMenuPreview({ categories, popularItems, restaurantId, tableI
         tableId={tableId}
         sessionId={session?.id || ""}
         restaurantId={restaurantId}
-        onOrderPlaced={() => setIsCartOpen(false)}
+        onOrderPlaced={handleOrderPlaced}
       />
 
       {/* Floating Cart Button */}
@@ -116,6 +127,18 @@ export function HomeMenuPreview({ categories, popularItems, restaurantId, tableI
         itemCount={totalItems}
         totalPrice={totalPrice}
         onClick={() => setIsCartOpen(true)}
+      />
+
+      {/* View Orders / Bill Button (shown if session exists) */}
+      {session && <OrdersFab onClick={() => setIsOrdersOpen(true)} />}
+
+      {/* Orders & Bill Drawer */}
+      <OrdersDrawer
+        isOpen={isOrdersOpen}
+        onClose={() => setIsOrdersOpen(false)}
+        sessionId={session?.id || ""}
+        restaurantId={restaurantId}
+        tableId={tableId}
       />
     </>
   );
