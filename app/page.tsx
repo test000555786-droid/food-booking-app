@@ -34,6 +34,17 @@ export default async function HomePage() {
   const { restaurant } = await getHomeData();
   const demoTableId = restaurant?.tables?.[0]?.id;
 
+  // Convert Decimal prices to numbers to avoid Next.js Client Component serialization errors
+  const safeMenuItems = restaurant?.menuItems.map(item => ({
+    ...item,
+    price: Number(item.price)
+  })) || [];
+
+  const safeRestaurant = restaurant ? {
+    ...restaurant,
+    menuItems: safeMenuItems
+  } : null;
+
   return (
     <div className="min-h-screen bg-bg">
       {/* Hero */}
@@ -94,18 +105,18 @@ export default async function HomePage() {
 
       {/* Categories & Menu Preview */}
       <HomeMenuPreview 
-        categories={restaurant?.categories || []} 
-        popularItems={restaurant?.menuItems || []} 
-        restaurantId={restaurant?.id || ""} 
+        categories={safeRestaurant?.categories || []} 
+        popularItems={safeRestaurant?.menuItems || []} 
+        restaurantId={safeRestaurant?.id || ""} 
         tableId={demoTableId || ""} 
       />
 
       {/* Reviews */}
-      {restaurant?.reviews && restaurant.reviews.length > 0 && (
+      {safeRestaurant?.reviews && safeRestaurant.reviews.length > 0 && (
         <section className="max-w-5xl mx-auto px-4 py-16">
           <h2 className="font-display text-2xl font-bold text-text text-center mb-10">What Our Guests Say</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {restaurant.reviews.map((review) => (
+            {safeRestaurant.reviews.map((review) => (
               <div key={review.id} className="bg-surface rounded-2xl border border-border p-4">
                 <div className="flex items-center gap-1 mb-2">
                   {Array.from({ length: 5 }, (_, i) => (
