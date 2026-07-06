@@ -4,20 +4,27 @@ import { NextRequest } from "next/server";
 import { JWTPayload, SessionUser, StaffRole } from "@/types";
 import { prisma } from "./prisma";
 
-const JWT_SECRET = process.env.JWT_SECRET || "tablescan-dev-secret";
-const secretKey = new TextEncoder().encode(JWT_SECRET);
+function getSecretKey() {
+  const jwtSecret = process.env.JWT_SECRET;
+
+  if (!jwtSecret) {
+    throw new Error("Missing required environment variable: JWT_SECRET");
+  }
+
+  return new TextEncoder().encode(jwtSecret);
+}
 
 export async function signToken(payload: JWTPayload): Promise<string> {
   const token = await new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("7d")
-    .sign(secretKey);
+    .sign(getSecretKey());
   return token;
 }
 
 export async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, secretKey);
+    const { payload } = await jwtVerify(token, getSecretKey());
     return payload as unknown as JWTPayload;
   } catch {
     return null;

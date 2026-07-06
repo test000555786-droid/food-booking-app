@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  // Point this at your Supabase PostgreSQL connection string.
   url      = env("DATABASE_URL")
 }
 

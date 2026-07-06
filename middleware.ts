@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { applySupabaseHeaders, updateSession } from "@/lib/supabase/middleware";
 import { StaffRole } from "./types";
 
 function decodeJwt(token: string) {
   try {
     const parts = token.split(".");
     if (parts.length !== 3) return null;
-    const decodedJson = atob(parts[1]);
+    const payload = parts[1];
+    if (!payload) return null;
+    const decodedJson = atob(payload);
     return JSON.parse(decodedJson);
   } catch (e) {
     return null;
@@ -27,14 +30,24 @@ const ADMIN_PATHS = [
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const supabaseResponse = await updateSession(request);
+
+  const redirectWithSupabase = (targetPath: string) =>
+    applySupabaseHeaders(
+      NextResponse.redirect(new URL(targetPath, request.url)),
+      supabaseResponse
+    );
+
+  const jsonWithSupabase = (body: unknown, init: ResponseInit) =>
+    applySupabaseHeaders(NextResponse.json(body, init), supabaseResponse);
 
   // Allow public paths
-  if (pathname === "/") return NextResponse.next();
-  if (pathname.startsWith("/menu/")) return NextResponse.next();
-  if (pathname.startsWith("/api/menu")) return NextResponse.next();
-  if (pathname.startsWith("/api/qr/")) return NextResponse.next();
+  if (pathname === "/") return supabaseResponse;
+  if (pathname.startsWith("/menu/")) return supabaseResponse;
+  if (pathname.startsWith("/api/menu")) return supabaseResponse;
+  if (pathname.startsWith("/api/qr/")) return supabaseResponse;
   if (pathname.startsWith("/api/reviews") && request.method === "POST") {
-    return NextResponse.next();
+    return supabaseResponse;
   }
 
   // Check auth token for protected routes
@@ -45,10 +58,10 @@ export async function middleware(request: NextRequest) {
     if (token) {
       const payload = decodeJwt(token);
       if (payload) {
-        return NextResponse.redirect(new URL("/staff/dashboard", request.url));
+        return redirectWithSupabase("/staff/dashboard");
       }
     }
-    return NextResponse.next();
+    return supabaseResponse;
   }
 
   // Admin login page
@@ -56,43 +69,43 @@ export async function middleware(request: NextRequest) {
     if (token) {
       const payload = decodeJwt(token);
       if (payload) {
-        return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+        return redirectWithSupabase("/admin/dashboard");
       }
     }
-    return NextResponse.next();
+    return supabaseResponse;
   }
 
   // Staff routes
   if (STAFF_PATHS.some((p) => pathname.startsWith(p))) {
     if (!token) {
-      return NextResponse.redirect(new URL("/staff", request.url));
+      return redirectWithSupabase("/staff");
     }
     const payload = decodeJwt(token);
     if (!payload) {
-      return NextResponse.redirect(new URL("/staff", request.url));
+      return redirectWithSupabase("/staff");
     }
     // STAFF, MANAGER, and ADMIN can access staff routes
     if (payload.role === StaffRole.STAFF || payload.role === StaffRole.MANAGER || payload.role === StaffRole.ADMIN) {
-      return NextResponse.next();
+      return supabaseResponse;
     }
-    return NextResponse.redirect(new URL("/staff", request.url));
+    return redirectWithSupabase("/staff");
   }
 
   // Admin routes
   if (ADMIN_PATHS.some((p) => pathname.startsWith(p))) {
     if (!token) {
-      return NextResponse.redirect(new URL("/admin", request.url));
+      return redirectWithSupabase("/admin");
     }
     const payload = decodeJwt(token);
     if (!payload) {
-      return NextResponse.redirect(new URL("/admin", request.url));
+      return redirectWithSupabase("/admin");
     }
     // Only MANAGER and ADMIN can access admin routes
     if (payload.role === StaffRole.MANAGER || payload.role === StaffRole.ADMIN) {
-      return NextResponse.next();
+      return supabaseResponse;
     }
     // STAFF gets redirected to staff dashboard
-    return NextResponse.redirect(new URL("/staff/dashboard", request.url));
+    return redirectWithSupabase("/staff/dashboard");
   }
 
   // API route protection
@@ -101,7 +114,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/api/waiter-calls") ||
     pathname.match(/^\/api\/tables\/[^\/]+\/session$/)
   ) {
-    return NextResponse.next(); // These are called by customers too
+    return supabaseResponse; // These are called by customers too
   }
 
   if (
@@ -111,20 +124,20 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/api/staff-users")
   ) {
     if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return jsonWithSupabase({ error: "Unauthorized" }, { status: 401 });
     }
     const payload = decodeJwt(token);
     if (!payload) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+      return jsonWithSupabase({ error: "Invalid token" }, { status: 401 });
     }
     // Only MANAGER and ADMIN for admin API routes
     if (payload.role === StaffRole.MANAGER || payload.role === StaffRole.ADMIN) {
-      return NextResponse.next();
+      return supabaseResponse;
     }
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return jsonWithSupabase({ error: "Forbidden" }, { status: 403 });
   }
 
-  return NextResponse.next();
+  return supabaseResponse;
 }
 
 export const config = {
