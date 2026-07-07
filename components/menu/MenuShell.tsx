@@ -36,9 +36,9 @@ export function MenuShell({ tableId, restaurant, table }: MenuShellProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: menuData, isLoading } = useMenu(restaurant.id);
-  const { items, totalItems, totalPrice, addToCart } = useCart();
+  const { totalItems, totalPrice, addToCart } = useCart();
   const { session, isLoading: isSessionLoading, startSession } = useTableSession(tableId);
-  
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(searchParams.get("category"));
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
@@ -118,7 +118,10 @@ export function MenuShell({ tableId, restaurant, table }: MenuShellProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center">
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: "var(--canvas)" }}
+      >
         <LoadingSpinner size="lg" label="Loading menu..." />
       </div>
     );
@@ -126,31 +129,69 @@ export function MenuShell({ tableId, restaurant, table }: MenuShellProps) {
 
   if (!menuData) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center">
-        <p className="text-text-muted">Failed to load menu</p>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: "var(--canvas)" }}
+      >
+        <p style={{ color: "var(--ink-muted)", fontFamily: "var(--font-work-sans)" }}>
+          Failed to load menu
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-bg pb-4">
-      {/* Unified Sticky Header */}
-      <div className="sticky top-0 z-40 bg-bg/85 backdrop-blur-xl border-b border-border shadow-sm">
+    <div className="min-h-screen pb-4" style={{ background: "var(--canvas)" }}>
+
+      {/* ── Sticky header ── */}
+      <div
+        className="sticky top-0 z-40 border-b"
+        style={{
+          background: "var(--canvas)",
+          borderColor: "var(--line)",
+        }}
+      >
         <header className="px-4 pt-4 pb-2">
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <h1 className="font-display text-2xl font-bold text-text">{restaurant.name}</h1>
+                <h1
+                  className="font-display text-2xl"
+                  style={{
+                    fontFamily: "var(--font-fraunces)",
+                    fontWeight: 600,
+                    color: "var(--ink)",
+                  }}
+                >
+                  {restaurant.name}
+                </h1>
                 {restaurant.tagline && (
-                  <p className="text-xs text-text-muted line-clamp-1">{restaurant.tagline}</p>
+                  <p
+                    className="text-xs line-clamp-1"
+                    style={{ color: "var(--ink-muted)", fontFamily: "var(--font-work-sans)" }}
+                  >
+                    {restaurant.tagline}
+                  </p>
                 )}
               </div>
-              <div className="text-right flex-shrink-0 ml-4">
-                <span className="inline-flex items-center px-3 py-1 bg-orange-50 text-primary text-xs font-bold rounded-full border border-orange-100 shadow-sm">
+
+              {/* Table number badge */}
+              <div className="flex-shrink-0 ml-4">
+                <span
+                  className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
+                  style={{
+                    background: "var(--card)",
+                    color: "var(--spice-deep)",
+                    fontFamily: "var(--font-mono)",
+                    border: "1px solid var(--line)",
+                    letterSpacing: "0.04em",
+                  }}
+                >
                   {formatTableName(table.tableNumber, table.label)}
                 </span>
               </div>
             </div>
+
             <SearchBar value={searchQuery} onChange={setSearchQuery} />
           </div>
         </header>
@@ -161,25 +202,41 @@ export function MenuShell({ tableId, restaurant, table }: MenuShellProps) {
             <CategoryTabs
               categories={categories}
               activeCategory={selectedCategory}
-              onCategoryChange={(id) => setSelectedCategory(prev => prev === id ? null : id)}
+              onCategoryChange={(id) =>
+                setSelectedCategory((prev) => (prev === id ? null : id))
+              }
             />
           </div>
         )}
       </div>
 
-      {/* Menu Items */}
-      <main className="max-w-2xl mx-auto px-4 pt-6">
+      {/* ── Menu Items ── */}
+      <main className="max-w-2xl mx-auto px-4 pt-4">
         {selectedCategory === null && !searchQuery && (
-          <div className="mb-4">
-            <h2 className="font-display text-lg font-semibold text-text mb-3">
-              {searchQuery ? "Search Results" : "All Items"}
+          <div className="mb-2">
+            <h2
+              className="font-display text-lg"
+              style={{
+                fontFamily: "var(--font-fraunces)",
+                fontWeight: 600,
+                color: "var(--ink)",
+              }}
+            >
+              All Items
             </h2>
           </div>
         )}
 
         {selectedCategory && !searchQuery && categories.find((c) => c.id === selectedCategory) && (
-          <div className="mb-4">
-            <h2 className="font-display text-lg font-semibold text-text mb-3">
+          <div className="mb-2">
+            <h2
+              className="font-display text-lg"
+              style={{
+                fontFamily: "var(--font-fraunces)",
+                fontWeight: 600,
+                color: "var(--ink)",
+              }}
+            >
               {categories.find((c) => c.id === selectedCategory)?.emoji}{" "}
               {categories.find((c) => c.id === selectedCategory)?.name}
             </h2>
@@ -190,12 +247,15 @@ export function MenuShell({ tableId, restaurant, table }: MenuShellProps) {
 
         {filteredItems.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-text-muted text-sm">No items found</p>
+            <p style={{ color: "var(--ink-muted)", fontFamily: "var(--font-work-sans)" }}
+               className="text-sm">
+              No items found
+            </p>
           </div>
         )}
       </main>
 
-      {/* Item Detail Modal */}
+      {/* ── Overlays & drawers (all logic preserved) ── */}
       <ItemDetailModal
         item={selectedItem}
         isOpen={!!selectedItem}
@@ -203,7 +263,6 @@ export function MenuShell({ tableId, restaurant, table }: MenuShellProps) {
         onAddToCart={handleAddToCart}
       />
 
-      {/* Cart Drawer */}
       <CartDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
@@ -213,20 +272,16 @@ export function MenuShell({ tableId, restaurant, table }: MenuShellProps) {
         onOrderPlaced={handleOrderPlaced}
       />
 
-      {/* Floating Cart Button */}
       <CartFab
         itemCount={totalItems}
         totalPrice={totalPrice}
         onClick={() => setIsCartOpen(true)}
       />
 
-      {/* Call Waiter Button */}
       <WaiterCallButton tableId={tableId} />
 
-      {/* View Orders / Bill Button (shown if session exists) */}
       {session && <OrdersFab onClick={() => setIsOrdersOpen(true)} />}
 
-      {/* Orders & Bill Drawer */}
       <OrdersDrawer
         isOpen={isOrdersOpen}
         onClose={() => setIsOrdersOpen(false)}

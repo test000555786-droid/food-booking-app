@@ -1,22 +1,32 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Fraunces, Work_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const fraunces = Fraunces({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-fraunces",
   display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
-const playfair = Playfair_Display({
+const workSans = Work_Sans({
   subsets: ["latin"],
-  variable: "--font-playfair",
+  variable: "--font-work-sans",
   display: "swap",
+  weight: ["400", "500", "600"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
-  title: "TableScan — QR Ordering for Restaurants",
-  description: "Scan, order, and enjoy. Digital menu and ordering system for restaurants.",
+  title: "Spice Garden — QR Table Ordering",
+  description:
+    "Authentic Indian cuisine. Scan the QR code at your table to browse our menu and order directly.",
 };
 
 export default function RootLayout({
@@ -25,8 +35,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
-      <body className="font-body antialiased bg-bg text-text">{children}</body>
+    <html
+      lang="en"
+      className={`${fraunces.variable} ${workSans.variable} ${jetbrainsMono.variable}`}
+    >
+      <body className="font-body antialiased">{children}</body>
     </html>
   );
 }

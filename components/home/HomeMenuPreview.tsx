@@ -22,9 +22,9 @@ interface HomeMenuPreviewProps {
 }
 
 export function HomeMenuPreview({ categories, popularItems, restaurantId, tableId }: HomeMenuPreviewProps) {
-  const { items, totalItems, totalPrice, addToCart } = useCart();
+  const { totalItems, totalPrice, addToCart } = useCart();
   const { session, isLoading: isSessionLoading, startSession } = useTableSession(tableId);
-  
+
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
@@ -66,37 +66,90 @@ export function HomeMenuPreview({ categories, popularItems, restaurantId, tableI
 
   return (
     <>
-      {/* Categories */}
+      {/* ── Category pills ── */}
       {categories.length > 0 && (
-        <section className="bg-surface py-8 border-y border-border overflow-hidden">
+        <section
+          className="py-8 border-y overflow-hidden"
+          style={{ borderColor: "var(--line)", background: "var(--canvas)" }}
+        >
           <div className="max-w-5xl mx-auto px-4">
-            <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x justify-start">
-              {categories.map((category) => (
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x justify-start md:justify-center">
+              {categories.map((category) => {
+                const normalizedName = category.name.toLowerCase().replace(/\s+/g, '_');
+                const validImages = ['starters', 'main_course', 'breads', 'desserts', 'beverages'];
+                const imageUrl = validImages.includes(normalizedName) ? `/categories/${normalizedName}.png` : null;
+
+                return (
                 <Link
                   key={category.id}
                   href={`/menu/${tableId}?category=${category.id}`}
-                  className="snap-center flex-shrink-0 flex items-center gap-2 px-5 py-3 bg-white rounded-full border border-border hover:border-primary hover:text-primary transition-all shadow-sm font-semibold text-text text-sm"
+                  className="snap-center flex-shrink-0 flex items-center gap-2.5 pr-4 pl-1.5 py-1.5 rounded-full text-sm transition-colors whitespace-nowrap"
+                  style={{
+                    border: "1px solid var(--line)",
+                    color: "var(--ink-muted)",
+                    background: "var(--canvas)",
+                    fontFamily: "var(--font-work-sans)",
+                    fontWeight: 400,
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLAnchorElement).style.color = "var(--spice)";
+                    (e.currentTarget as HTMLAnchorElement).style.borderColor = "var(--spice)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLAnchorElement).style.color = "var(--ink-muted)";
+                    (e.currentTarget as HTMLAnchorElement).style.borderColor = "var(--line)";
+                  }}
                 >
-                  <span className="text-xl leading-none">{category.emoji}</span>
-                  <span className="whitespace-nowrap">{category.name}</span>
+                  {imageUrl ? (
+                    <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0" style={{ border: "1px solid var(--line)" }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={imageUrl} alt={category.name} className="w-full h-full object-cover" />
+                    </div>
+                  ) : category.emoji ? (
+                    <span className="text-base leading-none pl-2.5">{category.emoji}</span>
+                  ) : null}
+                  <span>{category.name}</span>
                 </Link>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
       )}
 
-      {/* Popular Dishes */}
+      {/* ── Popular Dishes (uses the dot-leader MenuItemCard list) ── */}
       {popularItems.length > 0 && (
-        <section className="bg-surface border-b border-border py-16">
-          <div className="max-w-5xl mx-auto px-4">
-            <h2 className="font-display text-2xl font-bold text-text text-center mb-10">Popular Dishes</h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {popularItems.map((item) => (
+        <section
+          className="border-b py-14"
+          style={{ borderColor: "var(--line)", background: "var(--canvas)" }}
+        >
+          <div className="max-w-2xl mx-auto px-4">
+            <p
+              className="font-mono text-xs uppercase tracking-[0.18em] mb-2"
+              style={{ color: "var(--gold)", fontFamily: "var(--font-mono)" }}
+            >
+              Most Loved
+            </p>
+            <h2
+              className="font-display text-3xl mb-8"
+              style={{
+                fontFamily: "var(--font-fraunces)",
+                fontWeight: 600,
+                color: "var(--ink)",
+                lineHeight: 1.1,
+              }}
+            >
+              Popular Dishes
+            </h2>
+
+            {/* Flat list — each MenuItemCard is now a dot-leader row */}
+            <div className="flex flex-col">
+              {popularItems.map((item, index) => (
                 <MenuItemCard
                   key={item.id}
                   item={item}
                   onClick={handleItemClick}
+                  index={index}
                 />
               ))}
             </div>

@@ -55,6 +55,13 @@ export function MenuItemForm({ categories, initialData, onSubmit, onCancel }: Me
     }
   }, [initialData]);
 
+  useEffect(() => {
+    // If categories load after initial render and categoryId is empty, set it to the first category
+    if (!form.categoryId && categories.length > 0) {
+      setForm((prev) => ({ ...prev, categoryId: categories[0].id }));
+    }
+  }, [categories]);
+
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof FormData, string>> = {};
 

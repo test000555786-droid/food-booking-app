@@ -82,19 +82,39 @@ export function CartDrawer({ isOpen, onClose, tableId, sessionId, restaurantId, 
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
-              className="absolute bottom-0 left-0 right-0 bg-surface rounded-t-3xl max-h-[85vh] flex flex-col"
+              className="absolute bottom-0 left-0 right-0 rounded-t-2xl max-h-[85vh] flex flex-col"
+              style={{ background: "var(--canvas)" }}
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-border">
+              <div
+                className="flex items-center justify-between p-4"
+                style={{ borderBottom: "1px solid var(--line)" }}
+              >
                 <div>
-                  <h2 className="font-display text-lg font-semibold text-text">Your Cart</h2>
-                  <p className="text-xs text-text-muted">{totalItems} item(s)</p>
+                  <h2
+                    className="font-display text-lg"
+                    style={{
+                      fontFamily: "var(--font-fraunces)",
+                      fontWeight: 600,
+                      color: "var(--ink)",
+                    }}
+                  >
+                    Your Cart
+                  </h2>
+                  <p
+                    className="text-xs font-mono"
+                    style={{ color: "var(--ink-muted)", fontFamily: "var(--font-mono)" }}
+                  >
+                    {totalItems} item{totalItems !== 1 ? "s" : ""}
+                  </p>
                 </div>
                 <button
                   onClick={onClose}
-                  className="w-8 h-8 rounded-full bg-bg flex items-center justify-center"
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ background: "var(--card)" }}
                 >
-                  <svg className="w-4 h-4 text-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                       style={{ color: "var(--ink)" }}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -105,10 +125,16 @@ export function CartDrawer({ isOpen, onClose, tableId, sessionId, restaurantId, 
                 <AnimatePresence>
                   {items.length === 0 ? (
                     <div className="py-12 text-center">
-                      <p className="text-text-muted text-sm">Your cart is empty</p>
+                      <p
+                        className="text-sm"
+                        style={{ color: "var(--ink-muted)", fontFamily: "var(--font-work-sans)" }}
+                      >
+                        Your cart is empty
+                      </p>
                       <button
                         onClick={onClose}
-                        className="mt-3 text-primary text-sm font-medium"
+                        className="mt-3 text-sm font-medium"
+                        style={{ color: "var(--spice)", fontFamily: "var(--font-work-sans)" }}
                       >
                         Browse Menu
                       </button>
@@ -129,31 +155,71 @@ export function CartDrawer({ isOpen, onClose, tableId, sessionId, restaurantId, 
 
               {/* Footer */}
               {items.length > 0 && (
-                <div className="border-t border-border p-4 space-y-3">
+                <div className="p-4 space-y-3" style={{ borderTop: "1px solid var(--line)" }}>
+                  {/* Subtotal row */}
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-text-muted">Subtotal</span>
-                    <span className="font-semibold text-text tabular-nums">{formatPrice(totalPrice)}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-text-muted">Taxes</span>
-                    <span className="text-success text-xs">Included</span>
-                  </div>
-                  <div className="flex items-center justify-between pt-2 border-t border-border">
-                    <span className="font-semibold text-text">Total</span>
-                    <span className="font-bold text-lg text-text tabular-nums">{formatPrice(totalPrice)}</span>
+                    <span style={{ color: "var(--ink-muted)", fontFamily: "var(--font-work-sans)" }}>
+                      Subtotal
+                    </span>
+                    <span
+                      className="font-mono"
+                      style={{ color: "var(--ink)", fontFamily: "var(--font-mono)" }}
+                    >
+                      {formatPrice(totalPrice)}
+                    </span>
                   </div>
 
+                  {/* Taxes row */}
+                  <div className="flex items-center justify-between text-sm">
+                    <span style={{ color: "var(--ink-muted)", fontFamily: "var(--font-work-sans)" }}>
+                      Taxes
+                    </span>
+                    <span
+                      className="text-xs"
+                      style={{ color: "var(--sage)", fontFamily: "var(--font-work-sans)" }}
+                    >
+                      Included
+                    </span>
+                  </div>
+
+                  {/* Total row */}
+                  <div
+                    className="flex items-center justify-between pt-2"
+                    style={{ borderTop: "1px solid var(--line)" }}
+                  >
+                    <span
+                      className="font-medium"
+                      style={{ color: "var(--ink)", fontFamily: "var(--font-work-sans)" }}
+                    >
+                      Total
+                    </span>
+                    <span
+                      className="font-mono text-lg font-medium"
+                      style={{ color: "var(--ink)", fontFamily: "var(--font-mono)" }}
+                    >
+                      {formatPrice(totalPrice)}
+                    </span>
+                  </div>
+
+                  {/* Place Order CTA */}
                   <button
                     onClick={handlePlaceOrder}
                     disabled={isPlacing}
-                    className="w-full py-3.5 bg-primary hover:bg-primary-hover text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-3.5 rounded-xl font-medium transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                    style={{
+                      background: "var(--spice)",
+                      color: "var(--canvas)",
+                      fontFamily: "var(--font-work-sans)",
+                    }}
                   >
-                    {isPlacing ? "Placing Order..." : `Place Order · ${formatPrice(totalPrice)}`}
+                    {isPlacing ? "Placing Order…" : `Place Order · ${formatPrice(totalPrice)}`}
                   </button>
 
+                  {/* Clear cart */}
                   <button
                     onClick={() => setShowConfirm(true)}
-                    className="w-full py-2 text-sm text-text-muted hover:text-danger transition-colors"
+                    className="w-full py-2 text-sm transition-colors"
+                    style={{ color: "var(--ink-muted)", fontFamily: "var(--font-work-sans)" }}
                   >
                     Clear Cart
                   </button>

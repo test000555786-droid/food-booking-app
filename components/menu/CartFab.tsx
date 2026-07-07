@@ -13,24 +13,55 @@ export function CartFab({ itemCount, totalPrice, onClick }: CartFabProps) {
   return (
     <AnimatePresence>
       {itemCount > 0 && (
-        <motion.button
+        <motion.div
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ type: "spring", damping: 20 }}
-          onClick={onClick}
-          className="fixed bottom-4 left-4 right-4 z-40 bg-primary hover:bg-primary-hover text-white py-3.5 px-5 rounded-2xl shadow-lg flex items-center justify-between transition-colors"
+          className="fixed bottom-0 left-0 right-0 z-40"
+          style={{ borderTop: "1px solid var(--line)" }}
         >
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
+          <div
+            className="flex items-center justify-between px-5 py-3"
+            style={{ background: "var(--canvas)" }}
+          >
+            {/* Left — item count + label */}
+            <div className="flex items-center gap-2">
+              <span
+                className="text-sm"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--ink-muted)",
+                }}
+              >
+                {itemCount} item{itemCount !== 1 ? "s" : ""}
+              </span>
+              <span style={{ color: "var(--line)" }}>·</span>
+              <span
+                className="text-sm font-medium"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--ink)",
+                }}
+              >
+                {formatPrice(totalPrice)}
+              </span>
             </div>
-            <span className="font-medium text-sm">{itemCount} item(s)</span>
+
+            {/* Right — CTA */}
+            <button
+              onClick={onClick}
+              className="px-5 py-2 rounded-full text-sm font-medium transition-colors"
+              style={{
+                background: "var(--spice)",
+                color: "var(--canvas)",
+                fontFamily: "var(--font-work-sans)",
+              }}
+            >
+              View cart
+            </button>
           </div>
-          <span className="font-semibold tabular-nums">{formatPrice(totalPrice)}</span>
-        </motion.button>
+        </motion.div>
       )}
     </AnimatePresence>
   );

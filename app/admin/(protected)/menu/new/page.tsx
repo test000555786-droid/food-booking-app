@@ -17,19 +17,19 @@ export default function NewMenuItemPage() {
   useEffect(() => {
     fetch("/api/auth/session")
       .then((res) => res.json())
-      .then((data) => {
+      .then(async (data) => {
         if (data.user) {
           setUser(data.user);
-          loadCategories();
+          await loadCategories(data.user.restaurantId);
         }
       })
       .catch(() => {})
       .finally(() => setIsLoading(false));
   }, []);
 
-  const loadCategories = async () => {
+  const loadCategories = async (restaurantId: string) => {
     try {
-      const res = await fetch("/api/categories");
+      const res = await fetch(`/api/categories?restaurantId=${restaurantId}`);
       if (res.ok) {
         const data = await res.json();
         setCategories(data.categories || []);

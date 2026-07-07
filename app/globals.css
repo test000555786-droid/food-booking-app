@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   SPICE GARDEN — Design Tokens
+   ============================================================ */
+:root {
+  --canvas:     #FBF6ED;  /* warm ivory — page background */
+  --ink:        #2B1A12;  /* deep espresso — primary text  */
+  --ink-muted:  #6B5A4C;  /* warm taupe — secondary text   */
+  --spice:      #C1440E;  /* burnt terracotta — CTAs       */
+  --spice-deep: #8B2635;  /* deep maroon — tags, accents   */
+  --gold:       #B8892B;  /* turmeric gold — dividers/icons*/
+  --sage:       #3D4F3D;  /* cardamom green — veg indicator*/
+  --line:       #E3D9C6;  /* hairline dividers / borders   */
+  --card:       #F5E3D8;  /* soft pill / badge background  */
+  --warm-ivory: #F5EDE0;  /* slightly warmer — alt sections */
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -14,32 +30,46 @@ html {
 
 body {
   min-height: 100vh;
+  background-color: var(--canvas);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Hide scrollbar for category tabs */
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
+/* ============================================================
+   Typography helpers
+   ============================================================ */
+
+/* All prices, quantities, order IDs, table numbers → mono */
+.font-price,
+.tabular-nums {
+  font-family: var(--font-mono), 'Courier New', monospace;
+  font-variant-numeric: tabular-nums;
 }
+
+/* ============================================================
+   Scrollbar
+   ============================================================ */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
-/* Tabular numbers for prices */
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
-}
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: var(--line); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-muted); }
 
-/* Line clamp utilities */
+/* ============================================================
+   Line-clamp utilities
+   ============================================================ */
 .line-clamp-1 {
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -47,44 +77,26 @@ body {
   overflow: hidden;
 }
 
-/* Custom scrollbar for staff dashboard */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* ============================================================
+   Dot-leader — shared pattern
+   Used inside MenuLine component
+   ============================================================ */
+.dot-leader {
+  flex: 1;
+  min-width: 1rem;
+  border-bottom: 1px dotted var(--line);
+  transform: translateY(-3px);
+  margin: 0 0.5rem;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #d1d0cb;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #a3a29d;
-}
-
-/* Toast animation overrides */
+/* ============================================================
+   Toast animations
+   ============================================================ */
 @keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
 }
-
 @keyframes slideOutRight {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(100%);
-    opacity: 0;
-  }
+  from { transform: translateX(0);    opacity: 1; }
+  to   { transform: translateX(100%); opacity: 0; }
 }

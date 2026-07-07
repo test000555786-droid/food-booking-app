@@ -9,34 +9,52 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Spice Garden design tokens — mapped to CSS vars
+        canvas:       "var(--canvas)",
+        ink: {
+          DEFAULT:    "var(--ink)",
+          muted:      "var(--ink-muted)",
+        },
+        spice: {
+          DEFAULT:    "var(--spice)",
+          deep:       "var(--spice-deep)",
+        },
+        gold:         "var(--gold)",
+        sage:         "var(--sage)",
+        line:         "var(--line)",
+        card:         "var(--card)",
+
+        // Legacy aliases kept so any untouched admin/staff components still compile
         primary: {
-          DEFAULT: "#E07B2A",
-          hover: "#C96E22",
-          light: "#FDF3E7",
+          DEFAULT:    "var(--spice)",
+          hover:      "var(--spice-deep)",
+          light:      "var(--card)",
         },
-        surface: "#FFFFFF",
-        bg: "#FAFAF7",
-        border: "#E8E6DF",
+        surface:      "var(--canvas)",
+        bg:           "var(--canvas)",
+        border:       "var(--line)",
         text: {
-          DEFAULT: "#1A1A18",
-          muted: "#6B6B68",
+          DEFAULT:    "var(--ink)",
+          muted:      "var(--ink-muted)",
         },
-        success: "#2D7A4F",
-        danger: "#C0392B",
+        success:      "var(--sage)",
+        danger:       "#B91C1C",
       },
       fontFamily: {
-        display: ["var(--font-playfair)", "serif"],
-        body: ["var(--font-inter)", "sans-serif"],
+        display: ["var(--font-fraunces)", "Georgia", "serif"],
+        body:    ["var(--font-work-sans)", "system-ui", "sans-serif"],
+        mono:    ["var(--font-mono)", "'Courier New'", "monospace"],
       },
       borderRadius: {
         "2xl": "1rem",
-        xl: "0.75rem",
+        xl:    "0.75rem",
         "3xl": "1.5rem",
       },
+      // No drop shadows anywhere — per design rules
       boxShadow: {
-        sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-        card: "0 1px 3px 0 rgba(0, 0, 0, 0.08)",
-        drawer: "0 -4px 20px rgba(0, 0, 0, 0.1)",
+        none: "none",
+        // Kept minimal for drawers (hairline only, no blur)
+        drawer: "0 -1px 0 0 var(--line)",
       },
     },
   },
