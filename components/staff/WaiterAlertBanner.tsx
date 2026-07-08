@@ -1,15 +1,36 @@
 "use client";
 
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WaiterCall, CallType } from "@/types";
 import { formatTableName, formatRelativeTime } from "@/lib/formatters";
+import toast from "react-hot-toast";
 
 interface WaiterAlertBannerProps {
   calls: WaiterCall[];
-  onResolve: (callId: string) => void;
+  onResolve: (callId: string) => Promise<void>;
 }
 
 export function WaiterAlertBanner({ calls, onResolve }: WaiterAlertBannerProps) {
+  const [resolvingIds, setResolvingIds] = useState<Set<string>>(new Set());
+
+  const handleResolve = async (callId: string) => {
+    if (resolvingIds.has(callId)) return;
+
+    setResolvingIds((prev) => new Set(prev).add(callId));
+    try {
+      await onResolve(callId);
+    } catch {
+      toast.error("Failed to resolve. Please try again.");
+    } finally {
+      setResolvingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(callId);
+        return next;
+      });
+    }
+  };
+
   return (
     <AnimatePresence>
       {calls.map((call) => (
@@ -51,10 +72,21 @@ export function WaiterAlertBanner({ calls, onResolve }: WaiterAlertBannerProps) 
               </div>
             </div>
             <button
-              onClick={() => onResolve(call.id)}
-              className="px-3 py-1.5 bg-white border border-border rounded-lg text-sm font-medium text-text hover:bg-bg transition-colors"
+              onClick={() => handleResolve(call.id)}
+              disabled={resolvingIds.has(call.id)}
+              className="px-3 py-1.5 bg-white border border-border rounded-lg text-sm font-medium text-text hover:bg-bg transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-1.5"
             >
-              Resolve
+              {resolvingIds.has(call.id) ? (
+                <>
+                  <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Resolving…
+                </>
+              ) : (
+                "Resolve"
+              )}
             </button>
           </div>
         </motion.div>

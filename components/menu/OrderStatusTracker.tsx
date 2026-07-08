@@ -99,27 +99,10 @@ function OrderCard({ order }: { order: Order }) {
 export function OrderStatusTracker({ initialOrders, restaurantId }: OrderStatusTrackerProps) {
   const [orders, setOrders] = useState<Order[]>(initialOrders);
 
-  // Sync when parent data changes (e.g. from polling)
+  // Sync when parent data changes (e.g. from polling or Pusher event in parent)
   useEffect(() => {
     setOrders(initialOrders);
   }, [initialOrders]);
-
-  // Subscribe to real-time updates
-  useEffect(() => {
-    if (!restaurantId) return;
-
-    const channel = getRestaurantChannel(restaurantId);
-
-    channel.bind("order-updated", (updatedOrder: Order) => {
-      setOrders((prev) =>
-        prev.map((o) => (o.id === updatedOrder.id ? updatedOrder : o))
-      );
-    });
-
-    return () => {
-      channel.unbind("order-updated");
-    };
-  }, [restaurantId]);
 
   if (orders.length === 0) {
     return (

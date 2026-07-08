@@ -12,9 +12,10 @@ interface ItemDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddToCart: (item: MenuItem, quantity: number, note: string) => void;
+  isDemoMode?: boolean;
 }
 
-export function ItemDetailModal({ item, isOpen, onClose, onAddToCart }: ItemDetailModalProps) {
+export function ItemDetailModal({ item, isOpen, onClose, onAddToCart, isDemoMode = false }: ItemDetailModalProps) {
   const [quantity, setQuantity] = useState(1);
   const [note, setNote] = useState("");
 
@@ -163,52 +164,58 @@ export function ItemDetailModal({ item, isOpen, onClose, onAddToCart }: ItemDeta
                 />
               </div>
 
-              {/* Quantity & Add to Cart */}
-              <div className="flex items-center gap-4">
-                {/* Qty stepper */}
-                <div
-                  className="flex items-center rounded-lg overflow-hidden"
-                  style={{ border: "1px solid var(--line)" }}
-                >
+              {/* Quantity & Add to Cart (Hidden in Demo Mode) */}
+              {!isDemoMode ? (
+                <div className="flex items-center gap-4">
+                  {/* Qty stepper */}
+                  <div
+                    className="flex items-center rounded-lg overflow-hidden"
+                    style={{ border: "1px solid var(--line)" }}
+                  >
+                    <button
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="w-10 h-10 flex items-center justify-center transition-colors"
+                      style={{ color: "var(--ink)" }}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                      </svg>
+                    </button>
+                    <span
+                      className="w-10 h-10 flex items-center justify-center text-sm font-medium"
+                      style={{ fontFamily: "var(--font-mono)", color: "var(--ink)" }}
+                    >
+                      {quantity}
+                    </span>
+                    <button
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="w-10 h-10 flex items-center justify-center transition-colors"
+                      style={{ color: "var(--ink)" }}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Add to Cart */}
                   <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 flex items-center justify-center transition-colors"
-                    style={{ color: "var(--ink)" }}
+                    onClick={handleAdd}
+                    className="flex-1 h-10 rounded-xl font-medium text-sm transition-opacity"
+                    style={{
+                      background: "var(--spice)",
+                      color: "var(--canvas)",
+                      fontFamily: "var(--font-work-sans)",
+                    }}
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                    </svg>
-                  </button>
-                  <span
-                    className="w-10 h-10 flex items-center justify-center text-sm font-medium"
-                    style={{ fontFamily: "var(--font-mono)", color: "var(--ink)" }}
-                  >
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-10 h-10 flex items-center justify-center transition-colors"
-                    style={{ color: "var(--ink)" }}
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
+                    Add to Cart · {formatPrice(Number(item.price) * quantity)}
                   </button>
                 </div>
-
-                {/* Add to Cart */}
-                <button
-                  onClick={handleAdd}
-                  className="flex-1 h-10 rounded-xl font-medium text-sm transition-opacity"
-                  style={{
-                    background: "var(--spice)",
-                    color: "var(--canvas)",
-                    fontFamily: "var(--font-work-sans)",
-                  }}
-                >
-                  Add to Cart · {formatPrice(Number(item.price) * quantity)}
-                </button>
-              </div>
+              ) : (
+                <div className="text-center p-3 rounded-lg mt-2" style={{ background: "var(--bg)", border: "1px solid var(--line)" }}>
+                  <p className="text-sm font-medium" style={{ color: "var(--ink)" }}>Scan a QR code to order</p>
+                </div>
+              )}
             </div>
           </motion.div>
         </motion.div>

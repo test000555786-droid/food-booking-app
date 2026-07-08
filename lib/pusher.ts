@@ -73,3 +73,13 @@ export async function triggerCallResolved(restaurantId: string, callId: string):
     console.error("Pusher trigger error (call-resolved):", error);
   }
 }
+
+export async function triggerBillSettled(restaurantId: string, tableId: string): Promise<void> {
+  if (!isPusherConfigured()) return;
+  try {
+    const channel = getRestaurantChannel(restaurantId);
+    await pusher.trigger(channel, "bill-settled", { tableId });
+  } catch (error) {
+    console.error("Pusher trigger error (bill-settled):", error);
+  }
+}

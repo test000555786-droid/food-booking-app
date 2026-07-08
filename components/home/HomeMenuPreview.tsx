@@ -18,16 +18,19 @@ interface HomeMenuPreviewProps {
   categories: Category[];
   popularItems: MenuItem[];
   restaurantId: string;
+  restaurantId: string;
   tableId: string;
+  isDemoMode?: boolean;
 }
 
-export function HomeMenuPreview({ categories, popularItems, restaurantId, tableId }: HomeMenuPreviewProps) {
+export function HomeMenuPreview({ categories, popularItems, restaurantId, tableId, isDemoMode = false }: HomeMenuPreviewProps) {
   const { totalItems, totalPrice, addToCart } = useCart();
-  const { session, isLoading: isSessionLoading, startSession } = useTableSession(tableId);
+  const { session, isLoading: isSessionLoading, startSession, endSession } = useTableSession(tableId);
 
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
+  const [billSettled, setBillSettled] = useState(false);
   const router = useRouter();
 
   // Hydrate cart on mount
@@ -35,12 +38,12 @@ export function HomeMenuPreview({ categories, popularItems, restaurantId, tableI
     hydrateCart();
   }, []);
 
-  // Ensure session exists if they try to use cart
+  // Ensure session exists if they try to use cart (skip in demo mode)
   useEffect(() => {
-    if (totalItems > 0 && !session && !isSessionLoading) {
+    if (!isDemoMode && totalItems > 0 && !session && !isSessionLoading) {
       startSession(tableId).catch(() => {});
     }
-  }, [totalItems, session, isSessionLoading, tableId, startSession]);
+  }, [isDemoMode, totalItems, session, isSessionLoading, tableId, startSession]);
 
   const handleItemClick = (item: MenuItem) => {
     setSelectedItem(item);
@@ -62,6 +65,12 @@ export function HomeMenuPreview({ categories, popularItems, restaurantId, tableI
     setIsCartOpen(false);
     setIsOrdersOpen(true);
     router.refresh();
+  };
+
+  const handleBillSettled = () => {
+    endSession();
+    setBillSettled(true);
+    setIsOrdersOpen(true);
   };
 
   return (
@@ -163,36 +172,42 @@ export function HomeMenuPreview({ categories, popularItems, restaurantId, tableI
         isOpen={!!selectedItem}
         onClose={() => setSelectedItem(null)}
         onAddToCart={handleAddToCart}
+        isDemoMode={isDemoMode}
       />
 
-      {/* Cart Drawer */}
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        tableId={tableId}
-        sessionId={session?.id || ""}
-        restaurantId={restaurantId}
-        onOrderPlaced={handleOrderPlaced}
-      />
+      {!isDemoMode && (
+        <>
+          {/* Cart Drawer */}
+          <CartDrawer
+            isOpen={isCartOpen}
+            onClose={() => setIsCartOpen(false)}
+            tableId={tableId}
+            sessionId={session?.id || ""}
+            restaurantId={restaurantId}
+            onOrderPlaced={handleOrderPlaced}
+          />
 
-      {/* Floating Cart Button */}
-      <CartFab
-        itemCount={totalItems}
-        totalPrice={totalPrice}
-        onClick={() => setIsCartOpen(true)}
-      />
+          {/* Floating Cart Button */}
+          <CartFab
+            itemCount={totalItems}
+            totalPrice={totalPrice}
+            onClick={() => setIsCartOpen(true)}
+          />
 
-      {/* View Orders / Bill Button (shown if session exists) */}
-      {session && <OrdersFab onClick={() => setIsOrdersOpen(true)} />}
+          {/* View Orders / Bill Button (shown if session exists and bill not settled) */}
+          {session && !billSettled && <OrdersFab onClick={() => setIsOrdersOpen(true)} />}
 
-      {/* Orders & Bill Drawer */}
-      <OrdersDrawer
-        isOpen={isOrdersOpen}
-        onClose={() => setIsOrdersOpen(false)}
-        sessionId={session?.id || ""}
-        restaurantId={restaurantId}
-        tableId={tableId}
-      />
+          {/* Orders & Bill Drawer */}
+          <OrdersDrawer
+            isOpen={isOrdersOpen}
+            onClose={() => setIsOrdersOpen(false)}
+            sessionId={session?.id || ""}
+            restaurantId={restaurantId}
+            tableId={tableId}
+            onBillSettled={handleBillSettled}
+          />
+        </>
+      )}
     </>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Order, OrderStatus } from "@/types";
-import { getRestaurantChannel, unsubscribeFromChannel } from "@/lib/pusher-client";
+import { getRestaurantChannel } from "@/lib/pusher-client";
 
 interface UseOrdersReturn {
   orders: Order[];
@@ -63,7 +63,7 @@ export function useOrders(restaurantId: string): UseOrdersReturn {
     return () => {
       channel.unbind("new-order");
       channel.unbind("order-updated");
-      unsubscribeFromChannel(restaurantId);
+      // Do NOT call unsubscribeFromChannel here — the channel is shared!
     };
   }, [restaurantId]);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MenuItem } from "@/types";
 import { useCart } from "@/hooks/useCart";
@@ -30,34 +30,36 @@ interface MenuShellProps {
     tableNumber: number;
     label?: string | null;
   };
+  isDemoMode?: boolean;
 }
 
-export function MenuShell({ tableId, restaurant, table }: MenuShellProps) {
+export function MenuShell({ tableId, restaurant, table, isDemoMode = false }: MenuShellProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: menuData, isLoading } = useMenu(restaurant.id);
   const { totalItems, totalPrice, addToCart } = useCart();
-  const { session, isLoading: isSessionLoading, startSession } = useTableSession(tableId);
+  const { session, isLoading: isSessionLoading, startSession, endSession } = useTableSession(tableId);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(searchParams.get("category"));
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
+  const [billSettled, setBillSettled] = useState(false);
 
   // Hydrate cart on mount
   useEffect(() => {
     hydrateCart();
   }, []);
 
-  // Start session if not exists
+  // Start session if not exists (skip in demo mode)
   useEffect(() => {
-    if (!session && !isSessionLoading) {
+    if (!isDemoMode && !session && !isSessionLoading) {
       startSession(tableId).catch(() => {
         // Session may already exist
       });
     }
-  }, [session, isSessionLoading, tableId, startSession]);
+  }, [isDemoMode, session, isSessionLoading, tableId, startSession]);
 
   // Filter items by category and search
   const filteredItems = useMemo(() => {
@@ -115,6 +117,13 @@ export function MenuShell({ tableId, restaurant, table }: MenuShellProps) {
     setIsOrdersOpen(true);
     router.refresh();
   };
+
+  const handleBillSettled = useCallback(() => {
+    // Clear session from localStorage and memory so the Orders FAB disappears
+    endSession();
+    setBillSettled(true);
+    setIsOrdersOpen(true); // Keep drawer open to show the thank-you screen
+  }, [endSession]);
 
   if (isLoading) {
     return (
@@ -261,34 +270,41 @@ export function MenuShell({ tableId, restaurant, table }: MenuShellProps) {
         isOpen={!!selectedItem}
         onClose={() => setSelectedItem(null)}
         onAddToCart={handleAddToCart}
+        isDemoMode={isDemoMode}
       />
 
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        tableId={tableId}
-        sessionId={session?.id || ""}
-        restaurantId={restaurant.id}
-        onOrderPlaced={handleOrderPlaced}
-      />
+      {!isDemoMode && (
+        <>
+          <CartDrawer
+            isOpen={isCartOpen}
+            onClose={() => setIsCartOpen(false)}
+            tableId={tableId}
+            sessionId={session?.id || ""}
+            restaurantId={restaurant.id}
+            onOrderPlaced={handleOrderPlaced}
+          />
 
-      <CartFab
-        itemCount={totalItems}
-        totalPrice={totalPrice}
-        onClick={() => setIsCartOpen(true)}
-      />
+          <CartFab
+            itemCount={totalItems}
+            totalPrice={totalPrice}
+            onClick={() => setIsCartOpen(true)}
+          />
 
-      <WaiterCallButton tableId={tableId} />
+          <WaiterCallButton tableId={tableId} />
 
-      {session && <OrdersFab onClick={() => setIsOrdersOpen(true)} />}
+          {/* Show Orders FAB only when there is an active session and bill is not yet settled */}
+          {session && !billSettled && <OrdersFab onClick={() => setIsOrdersOpen(true)} />}
 
-      <OrdersDrawer
-        isOpen={isOrdersOpen}
-        onClose={() => setIsOrdersOpen(false)}
-        sessionId={session?.id || ""}
-        restaurantId={restaurant.id}
-        tableId={tableId}
-      />
+          <OrdersDrawer
+            isOpen={isOrdersOpen}
+            onClose={() => setIsOrdersOpen(false)}
+            sessionId={session?.id || ""}
+            restaurantId={restaurant.id}
+            tableId={tableId}
+            onBillSettled={handleBillSettled}
+          />
+        </>
+      )}
     </div>
   );
 }

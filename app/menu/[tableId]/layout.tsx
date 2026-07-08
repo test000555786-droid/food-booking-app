@@ -9,6 +9,9 @@ interface MenuLayoutProps {
 }
 
 async function getTableData(tableId: string) {
+  if (tableId === "preview") {
+    return { table: { isActive: true } }; // mock table
+  }
   const table = await prisma.table.findUnique({
     where: { id: tableId },
     include: { restaurant: true },

@@ -10,6 +10,16 @@ interface MenuPageProps {
 }
 
 async function getMenuPageData(tableId: string) {
+  if (tableId === "preview") {
+    const restaurant = await prisma.restaurant.findFirst();
+    if (!restaurant) return null;
+    return {
+      table: { tableNumber: 0, label: "Demo Preview" },
+      restaurant,
+      isDemoMode: true
+    };
+  }
+
   const table = await prisma.table.findUnique({
     where: { id: tableId },
     include: { restaurant: true },
@@ -17,7 +27,7 @@ async function getMenuPageData(tableId: string) {
 
   if (!table) return null;
 
-  return { table, restaurant: table.restaurant };
+  return { table, restaurant: table.restaurant, isDemoMode: false };
 }
 
 export default async function MenuPage({ params }: MenuPageProps) {
@@ -27,7 +37,7 @@ export default async function MenuPage({ params }: MenuPageProps) {
     notFound();
   }
 
-  const { table, restaurant } = data;
+  const { table, restaurant, isDemoMode } = data;
 
   return (
     <>
@@ -47,6 +57,7 @@ export default async function MenuPage({ params }: MenuPageProps) {
         tableId={params.tableId}
         restaurant={{ id: restaurant.id, name: restaurant.name, tagline: restaurant.tagline }}
         table={{ tableNumber: table.tableNumber, label: table.label }}
+        isDemoMode={isDemoMode}
       />
     </>
   );

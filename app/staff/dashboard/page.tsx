@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { SessionUser, Order, OrderStatus } from "@/types";
 import { StaffNavbar } from "@/components/staff/StaffNavbar";
@@ -10,7 +11,7 @@ import { SoundAlert } from "@/components/staff/SoundAlert";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { useOrders } from "@/hooks/useOrders";
 import { useWaiterCalls } from "@/hooks/useWaiterCalls";
-import { getRestaurantChannel, unsubscribeFromChannel } from "@/lib/pusher-client";
+import { getRestaurantChannel } from "@/lib/pusher-client";
 
 const ORDER_STATUSES: { status: OrderStatus; title: string }[] = [
   { status: OrderStatus.PENDING, title: "Pending" },
@@ -42,13 +43,12 @@ export default function StaffDashboardPage() {
   const { orders, isLoading: isLoadingOrders, updateStatus, removeItem, refresh } = useOrders(restaurantId);
   const { unresolvedCalls, resolveCall } = useWaiterCalls(restaurantId);
 
-  // Subscribe to real-time
+  // Subscribe to real-time updates (keep channel alive for the page lifetime)
   useEffect(() => {
     if (!restaurantId) return;
-    const channel = getRestaurantChannel(restaurantId);
-    return () => {
-      unsubscribeFromChannel(restaurantId);
-    };
+    // Just subscribing here keeps the shared Pusher channel active.
+    // useOrders and useWaiterCalls each bind their own event handlers.
+    getRestaurantChannel(restaurantId);
   }, [restaurantId]);
 
   if (isLoadingUser) {
@@ -117,6 +117,7 @@ export default function StaffDashboardPage() {
           )}
         </div>
       </main>
+      <Toaster position="top-center" />
     </div>
   );
 }

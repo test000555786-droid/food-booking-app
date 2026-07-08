@@ -147,7 +147,7 @@ export default async function HomePage() {
             {demoTableId && (
               <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start mb-8">
                 <a
-                  href={`/menu/${demoTableId}`}
+                  href={`/menu/preview`}
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold transition-opacity hover:opacity-90"
                   style={{
                     background: "var(--spice)",
@@ -351,6 +351,7 @@ export default async function HomePage() {
         popularItems={safeRestaurant?.menuItems || []}
         restaurantId={safeRestaurant?.id || ""}
         tableId={demoTableId || ""}
+        isDemoMode={true}
       />
 
       {/* ══════════════════════════════════════════
@@ -401,7 +402,7 @@ export default async function HomePage() {
             {demoTableId && (
               <div className="mt-10">
                 <a
-                  href={`/menu/${demoTableId}`}
+                  href={`/menu/preview`}
                   className="inline-flex items-center gap-2 text-sm font-medium transition-colors"
                   style={{ color: "var(--spice)", fontFamily: "var(--font-work-sans)" }}
                 >
