@@ -39,7 +39,7 @@ export default function StaffDashboardPage() {
       .finally(() => setIsLoadingUser(false));
   }, []);
 
-  const { orders, isLoading: isLoadingOrders, updateStatus, refresh } = useOrders(restaurantId);
+  const { orders, isLoading: isLoadingOrders, updateStatus, removeItem, refresh } = useOrders(restaurantId);
   const { unresolvedCalls, resolveCall } = useWaiterCalls(restaurantId);
 
   // Subscribe to real-time
@@ -110,6 +110,7 @@ export default function StaffDashboardPage() {
                   status={status}
                   orders={getOrdersByStatus(status)}
                   onStatusChange={updateStatus}
+                  onRemoveItem={removeItem}
                 />
               ))}
             </div>

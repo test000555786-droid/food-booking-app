@@ -9,6 +9,7 @@ import { OrderStatusBadge } from "./OrderStatusBadge";
 interface OrderCardProps {
   order: Order;
   onStatusChange: (orderId: string, status: OrderStatus) => void;
+  onRemoveItem?: (orderId: string, itemId: string) => void;
 }
 
 const nextStatusMap: Record<OrderStatus, { label: string; next: OrderStatus | null; variant: string }> = {
@@ -20,7 +21,7 @@ const nextStatusMap: Record<OrderStatus, { label: string; next: OrderStatus | nu
   [OrderStatus.CANCELLED]: { label: "Cancelled", next: null, variant: "bg-red-400" },
 };
 
-export function OrderCard({ order, onStatusChange }: OrderCardProps) {
+export function OrderCard({ order, onStatusChange, onRemoveItem }: OrderCardProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const statusConfig = nextStatusMap[order.status];
 
@@ -39,6 +40,16 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
     setIsUpdating(true);
     try {
       await onStatusChange(order.id, OrderStatus.CANCELLED);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleRemoveItem = async (itemId: string) => {
+    if (!onRemoveItem || isUpdating) return;
+    setIsUpdating(true);
+    try {
+      await onRemoveItem(order.id, itemId);
     } finally {
       setIsUpdating(false);
     }
@@ -81,9 +92,23 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
                 <p className="text-xs text-text-muted italic">Note: {item.note}</p>
               )}
             </div>
-            <span className="text-text-muted tabular-nums ml-2">
-              {formatPrice(Number(item.unitPrice) * item.quantity)}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-text-muted tabular-nums">
+                {formatPrice(Number(item.unitPrice) * item.quantity)}
+              </span>
+              {order.status === OrderStatus.PENDING && onRemoveItem && (
+                <button
+                  onClick={() => handleRemoveItem(item.id)}
+                  disabled={isUpdating}
+                  className="p-1 text-danger/70 hover:text-danger hover:bg-danger/10 rounded transition-colors disabled:opacity-50"
+                  title="Remove item"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>

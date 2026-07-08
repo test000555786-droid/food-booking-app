@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { OrderStatus, Order } from "@/types";
 import { formatOrderNumber, formatRelativeTime } from "@/lib/formatters";
-import { getRestaurantChannel, unsubscribeFromChannel } from "@/lib/pusher-client";
+import { getRestaurantChannel } from "@/lib/pusher-client";
 
 interface OrderStatusTrackerProps {
   initialOrders: Order[];
@@ -34,7 +34,6 @@ function OrderCard({ order }: { order: Order }) {
 
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className="bg-surface rounded-2xl border border-border p-4"
@@ -70,7 +69,8 @@ function OrderCard({ order }: { order: Order }) {
                 />
                 {isCurrent && (
                   <motion.span
-                    layoutId="currentStep"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     className="text-[10px] font-medium text-success"
                   >
                     {step.label}
@@ -118,7 +118,6 @@ export function OrderStatusTracker({ initialOrders, restaurantId }: OrderStatusT
 
     return () => {
       channel.unbind("order-updated");
-      unsubscribeFromChannel(restaurantId);
     };
   }, [restaurantId]);
 

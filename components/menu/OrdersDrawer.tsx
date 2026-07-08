@@ -23,17 +23,22 @@ export function OrdersDrawer({ isOpen, onClose, sessionId, restaurantId, tableId
   useEffect(() => {
     if (!isOpen || !sessionId) return;
 
+    let isActive = true;
+
     const fetchOrders = (showLoading = true) => {
       if (showLoading) setIsLoading(true);
       fetch(`/api/orders?sessionId=${sessionId}`)
         .then((res) => res.json())
         .then((data) => {
-          if (data.orders) {
+          if (isActive && data.orders) {
             setOrders(data.orders);
           }
         })
+        .catch((err) => {
+          console.error("Failed to fetch orders:", err);
+        })
         .finally(() => {
-          if (showLoading) setIsLoading(false);
+          if (isActive && showLoading) setIsLoading(false);
         });
     };
 
@@ -45,7 +50,10 @@ export function OrdersDrawer({ isOpen, onClose, sessionId, restaurantId, tableId
       fetchOrders(false);
     }, 30000);
 
-    return () => clearInterval(interval);
+    return () => {
+      isActive = false;
+      clearInterval(interval);
+    };
   }, [isOpen, sessionId]);
 
   const handleRequestBill = async () => {

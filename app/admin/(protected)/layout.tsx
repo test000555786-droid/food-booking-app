@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useAdminStore } from "@/store/adminStore";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { isSidebarOpen, setIsSidebarOpen } = useAdminStore();
 
   return (
     <div className="min-h-screen bg-bg">

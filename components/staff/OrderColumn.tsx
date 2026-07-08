@@ -9,6 +9,7 @@ interface OrderColumnProps {
   status: OrderStatus;
   orders: Order[];
   onStatusChange: (orderId: string, status: OrderStatus) => void;
+  onRemoveItem?: (orderId: string, itemId: string) => void;
   colorClass?: string;
 }
 
@@ -21,7 +22,7 @@ const statusColors: Record<OrderStatus, string> = {
   [OrderStatus.CANCELLED]: "border-t-red-400",
 };
 
-export function OrderColumn({ title, status, orders, onStatusChange }: OrderColumnProps) {
+export function OrderColumn({ title, status, orders, onStatusChange, onRemoveItem }: OrderColumnProps) {
   return (
     <div className={`flex flex-col bg-bg/50 rounded-2xl border border-border border-t-4 ${statusColors[status]} min-h-[400px]`}>
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
@@ -47,6 +48,7 @@ export function OrderColumn({ title, status, orders, onStatusChange }: OrderColu
                 key={order.id}
                 order={order}
                 onStatusChange={onStatusChange}
+                onRemoveItem={onRemoveItem}
               />
             ))
           )}

@@ -2,17 +2,19 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAdminStore } from "@/store/adminStore";
 import { SessionUser } from "@/types";
 
 interface AdminHeaderProps {
   user: SessionUser;
-  onMenuClick: () => void;
+  onMenuClick?: () => void; // Made optional since it's now handled internally
   title?: string;
 }
 
-export function AdminHeader({ user, onMenuClick, title }: AdminHeaderProps) {
+export function AdminHeader({ user, title }: AdminHeaderProps) {
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
+  const setIsSidebarOpen = useAdminStore((state) => state.setIsSidebarOpen);
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -25,7 +27,7 @@ export function AdminHeader({ user, onMenuClick, title }: AdminHeaderProps) {
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
           <button
-            onClick={onMenuClick}
+            onClick={() => setIsSidebarOpen(true)}
             className="lg:hidden w-9 h-9 rounded-xl bg-bg flex items-center justify-center"
           >
             <svg className="w-5 h-5 text-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">

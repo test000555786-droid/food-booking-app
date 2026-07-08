@@ -92,7 +92,7 @@ export default async function HomePage() {
         <div className="relative max-w-6xl mx-auto px-6 py-16 md:py-20 flex flex-col md:flex-row items-center gap-12">
 
           {/* LEFT — text block */}
-          <div className="flex-1 text-center md:text-left">
+          <div className="flex-1 w-full min-w-0 text-center md:text-left">
 
             {/* Logo */}
             <div className="mb-8 flex justify-center md:justify-start">
@@ -109,7 +109,7 @@ export default async function HomePage() {
 
             {/* Restaurant name */}
             <h1
-              className="font-display text-5xl md:text-6xl lg:text-7xl mb-5"
+              className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-5 break-words"
               style={{
                 fontFamily: "var(--font-fraunces)",
                 fontWeight: 700,
@@ -136,7 +136,7 @@ export default async function HomePage() {
               style={{
                 color: "rgba(251,246,237,0.65)",
                 fontFamily: "var(--font-work-sans)",
-                maxWidth: "360px",
+                maxWidth: "min(100%, 360px)",
                 lineHeight: 1.7,
               }}
             >

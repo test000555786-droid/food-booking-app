@@ -10,6 +10,7 @@ interface UseOrdersReturn {
   error: string | null;
   refresh: () => Promise<void>;
   updateStatus: (orderId: string, status: OrderStatus) => Promise<void>;
+  removeItem: (orderId: string, itemId: string) => Promise<void>;
 }
 
 export function useOrders(restaurantId: string): UseOrdersReturn {
@@ -85,11 +86,29 @@ export function useOrders(restaurantId: string): UseOrdersReturn {
     }
   };
 
+  const removeItem = async (orderId: string, itemId: string) => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}/items/${itemId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Failed to remove item");
+
+      const updated = await res.json();
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? updated : o))
+      );
+    } catch (err) {
+      throw err;
+    }
+  };
+
   return {
     orders,
     isLoading,
     error,
     refresh: fetchOrders,
     updateStatus,
+    removeItem,
   };
 }
